@@ -1,6 +1,7 @@
 import readline from 'node:readline';
+import type { ProgressState } from './types.js';
 
-export function formatClock(seconds) {
+export function formatClock(seconds: number): string {
   if (!Number.isFinite(seconds) || seconds < 0) return '--:--';
   const rounded = Math.max(0, Math.round(seconds));
   const hours = Math.floor(rounded / 3600);
@@ -11,13 +12,13 @@ export function formatClock(seconds) {
     : `${String(minutes).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
 }
 
-export function renderBar(ratio, width = 24) {
+export function renderBar(ratio: number, width = 24): string {
   const clamped = Math.max(0, Math.min(1, ratio));
   const filled = Math.round(clamped * width);
   return `${'█'.repeat(filled)}${'░'.repeat(width - filled)}`;
 }
 
-export function formatProgress({ elapsed, total, speed, fps, eta }) {
+export function formatProgress({ elapsed, total, speed, fps, eta }: ProgressState & { total: number; eta: number }): string {
   const ratio = total > 0 ? elapsed / total : 0;
   const percent = Math.max(0, Math.min(100, ratio * 100));
   const speedText = Number.isFinite(speed) && speed > 0 ? `${speed.toFixed(2)}x` : '--x';
@@ -26,7 +27,13 @@ export function formatProgress({ elapsed, total, speed, fps, eta }) {
 }
 
 export class ProgressDisplay {
-  constructor(totalSeconds, output = process.stderr) {
+  private readonly total: number;
+  private readonly output: NodeJS.WriteStream;
+  private readonly startedAt: number;
+  private lastLogAt: number;
+  private smoothedSpeed: number | null;
+
+  constructor(totalSeconds: number, output: NodeJS.WriteStream = process.stderr) {
     this.total = totalSeconds;
     this.output = output;
     this.startedAt = performance.now();
@@ -34,11 +41,12 @@ export class ProgressDisplay {
     this.smoothedSpeed = null;
   }
 
-  update({ elapsed = 0, speed = 0, fps = 0 }) {
+  update({ elapsed = 0, speed = 0, fps = 0 }: ProgressState): void {
     if (speed > 0) {
       this.smoothedSpeed = this.smoothedSpeed === null ? speed : this.smoothedSpeed * 0.82 + speed * 0.18;
     }
-    const eta = this.smoothedSpeed > 0 ? Math.max(0, this.total - elapsed) / this.smoothedSpeed : Infinity;
+    const smoothedSpeed = this.smoothedSpeed;
+    const eta = smoothedSpeed !== null && smoothedSpeed > 0 ? Math.max(0, this.total - elapsed) / smoothedSpeed : Infinity;
     const line = `Rendering  ${formatProgress({ elapsed, total: this.total, speed, fps, eta })}`;
     if (this.output.isTTY) {
       readline.clearLine(this.output, 0);
@@ -53,7 +61,7 @@ export class ProgressDisplay {
     }
   }
 
-  finish() {
+  finish(): void {
     if (this.output.isTTY) this.output.write('\n');
   }
 }

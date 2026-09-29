@@ -1,3 +1,5 @@
+import type { VideoGeometryOptions } from './types.js';
+
 export const VIDEO_PRESETS = Object.freeze({
   '4k': { width: 3840, height: 2160, label: 'UHD 4K landscape' },
   '1440p': { width: 2560, height: 1440, label: 'QHD landscape' },
@@ -6,10 +8,19 @@ export const VIDEO_PRESETS = Object.freeze({
   'vertical-4k': { width: 2160, height: 3840, label: 'UHD 4K portrait' },
   'vertical': { width: 1080, height: 1920, label: 'Full HD portrait' },
   'square': { width: 2160, height: 2160, label: 'Square 4K-height' },
-});
+} as const);
 
-export function resolveVideoGeometry(options = {}) {
-  const presetName = options.preset ?? '4k';
+export type VideoPresetName = keyof typeof VIDEO_PRESETS;
+
+export interface ResolvedVideoGeometry {
+  preset: VideoPresetName;
+  width: number;
+  height: number;
+  fps: number;
+}
+
+export function resolveVideoGeometry(options: VideoGeometryOptions = {}): ResolvedVideoGeometry {
+  const presetName = (options.preset ?? '4k') as VideoPresetName;
   const preset = VIDEO_PRESETS[presetName];
   if (!preset) {
     throw new Error(`Unknown preset: ${presetName}. Available: ${Object.keys(VIDEO_PRESETS).join(', ')}`);
@@ -22,7 +33,7 @@ export function resolveVideoGeometry(options = {}) {
   };
 }
 
-export function outputContainer(filename) {
+export function outputContainer(filename: string): string {
   const extension = filename.toLowerCase().match(/\.[a-z0-9]+$/)?.[0];
   const supported = new Set(['.mp4', '.m4v', '.mov', '.mkv']);
   if (!extension || !supported.has(extension)) {
