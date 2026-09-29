@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="520" viewBox="0 0 1600 520" role="img" aria-labelledby="title desc">
+  <title id="title">Screen Studio Source Renderer</title>
+  <desc id="desc">A stylized video editor preview with screen zoom, rounded camera and render progress.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#18142f"/>
+      <stop offset="0.48" stop-color="#4038bd"/>
+      <stop offset="1" stop-color="#958ff0"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#73f7c6"/>
+      <stop offset="1" stop-color="#c6ff47"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="20" stdDeviation="22" flood-color="#05030c" flood-opacity=".5"/>
+    </filter>
+  </defs>
+  <rect width="1600" height="520" rx="32" fill="url(#bg)"/>
+  <circle cx="1450" cy="72" r="180" fill="#ffffff" opacity=".05"/>
+  <circle cx="120" cy="500" r="230" fill="#73f7c6" opacity=".06"/>
+  <g transform="translate(80 72)">
+    <text x="0" y="56" fill="#ffffff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="54" font-weight="750">Screen Studio</text>
+    <text x="0" y="116" fill="#d9d6ff" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif" font-size="54" font-weight="450">Source Renderer</text>
+    <text x="0" y="171" fill="#c4c0e8" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="20">native project → polished 4K video</text>
+    <g transform="translate(0 234)">
+      <rect width="535" height="76" rx="18" fill="#100d25" opacity=".82"/>
+      <rect x="24" y="27" width="350" height="22" rx="11" fill="#302b59"/>
+      <rect x="24" y="27" width="241" height="22" rx="11" fill="url(#accent)"/>
+      <text x="396" y="49" fill="#ffffff" font-family="ui-monospace,SFMono-Regular,Menlo,monospace" font-size="18">68% · ETA 05:03</text>
+    </g>
+  </g>
+  <g transform="translate(700 55)" filter="url(#shadow)">
+    <rect width="820" height="410" rx="26" fill="#0a0911"/>
+    <rect x="24" y="24" width="772" height="362" rx="16" fill="#11131b" stroke="#6d68c7" stroke-width="2"/>
+    <rect x="46" y="51" width="728" height="38" rx="9" fill="#272a35"/>
+    <circle cx="68" cy="70" r="7" fill="#ff625c"/>
+    <circle cx="92" cy="70" r="7" fill="#ffbd44"/>
+    <circle cx="116" cy="70" r="7" fill="#00ca4e"/>
+    <rect x="46" y="110" width="464" height="246" rx="10" fill="#171923"/>
+    <rect x="66" y="135" width="180" height="20" rx="5" fill="#c5c1f1" opacity=".75"/>
+    <rect x="66" y="175" width="406" height="12" rx="6" fill="#676580"/>
+    <rect x="66" y="201" width="350" height="12" rx="6" fill="#48465f"/>
+    <rect x="66" y="227" width="385" height="12" rx="6" fill="#48465f"/>
+    <rect x="66" y="272" width="260" height="58" rx="12" fill="#302b59" stroke="#817ae6"/>
+    <path d="M340 168l22 58 14-18 23 22 11-11-23-22 19-13z" fill="#fff" stroke="#090812" stroke-width="5"/>
+    <rect x="538" y="172" width="218" height="184" rx="46" fill="#292b39" stroke="#8d87eb" stroke-width="3"/>
+    <circle cx="647" cy="234" r="44" fill="#d0ab83"/>
+    <path d="M575 350c7-58 34-86 72-86s65 28 72 86" fill="#15151c"/>
+    <circle cx="556" cy="116" r="15" fill="#c6ff47"/>
+    <path d="M556 98v-18M538 116h-18M574 116h18M543 103l-13-13M569 103l13-13" stroke="#c6ff47" stroke-width="5" stroke-linecap="round"/>
+  </g>
+</svg>

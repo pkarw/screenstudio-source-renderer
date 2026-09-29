@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+.ai/
+*.mp4
+*.m4v
+*.mov
+*.mkv
+.render-work/

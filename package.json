@@ -1,0 +1,17 @@
+{
+  "name": "screenstudio-source-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Render Screen Studio source projects with FFmpeg, click zooms, rounded camera and ETA progress.",
+  "bin": {
+    "ss-render": "src/cli.js"
+  },
+  "scripts": {
+    "test": "node --test",
+    "check": "node --check src/cli.js && node --check src/project.js && node --check src/timeline.js && node --check src/ffmpeg.js && node --check src/options.js && node --check src/progress.js"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
