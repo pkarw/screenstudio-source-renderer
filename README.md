@@ -38,7 +38,7 @@ These are frames from real renders produced by this repository, not design mocku
 - Rebuilds multiple recorder sessions, non-destructive cuts and speed changes.
 - Uses Screen Studio's enhanced microphone track when available.
 - Reconstructs saved click-following, manual and instant zooms.
-- Shows the recorded cursor, preserves cursor type changes and follows the zoom crop.
+- Shows the recorded cursor, preserves visible cursor type changes and follows the zoom crop. Motion is interpolated from at most 30 control points per second so high-frequency recorder samples do not stall long renders.
 - Supports visible, hidden, resized, cropped, rounded or square camera overlays.
 - Supports corner presets and exact custom camera coordinates.
 - Uses the saved project background, or a CLI-selected color, gradient or image.
@@ -256,7 +256,7 @@ Supported video extensions are `.mp4`, `.m4v`, `.mov` and `.mkv`. Advanced users
 | Rounded camera | ✅ Supported | Project setting, preset or custom radius with antialiased edges. |
 | Square camera | ✅ Supported | `--square-camera` or `--camera-corners square`. |
 | Camera mirroring | ✅ Supported | Reads the saved project setting. |
-| Mouse cursor | ◐ Partial | Recorded position and cursor-type changes are preserved; vector artwork approximates macOS cursor images. |
+| Mouse cursor | ◐ Partial | Recorded motion is sampled to at most 30 control points per second and interpolated at output FPS; visible cursor-type changes are preserved, while vector artwork approximates macOS cursor images. |
 | Hide cursor per slice | ✅ Supported | Reads the saved `hideCursor` value. |
 | Solid background | ✅ Supported | Project value or CLI override. |
 | Gradient background | ✅ Supported | Project gradient or CLI override. |

@@ -18,6 +18,22 @@ interface CursorAssOptions extends CursorTransformOptions {
 
 const clamp = (value: number, minimum: number, maximum: number): number => Math.max(minimum, Math.min(maximum, value));
 
+export function resampleCursorMoves(moves: OutputCursorMove[], maximumRate = 30): OutputCursorMove[] {
+  if (moves.length < 2 || !Number.isFinite(maximumRate) || maximumRate <= 0) return [...moves];
+  const sampled: OutputCursorMove[] = [];
+  let currentBucket = -1;
+  for (const move of moves) {
+    const bucket = Math.floor(move.time * maximumRate);
+    if (bucket === currentBucket) {
+      sampled[sampled.length - 1] = move;
+    } else {
+      sampled.push(move);
+      currentBucket = bucket;
+    }
+  }
+  return sampled;
+}
+
 export function zoomProgressAt(zoom: OutputZoom, time: number): number {
   if (time < zoom.start || time > zoom.end) return 0;
   if (zoom.instant) return 1;

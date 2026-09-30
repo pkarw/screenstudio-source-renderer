@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { buildCursorAss, transformCursorPoint, zoomProgressAt } from '../src/cursor.js';
+import { buildCursorAss, resampleCursorMoves, transformCursorPoint, zoomProgressAt } from '../src/cursor.js';
 import type { OutputZoom } from '../src/types.js';
 
 const zoom: OutputZoom = {
@@ -40,4 +40,15 @@ test('buildCursorAss emits animated vector cursor events', () => {
   assert.match(ass, /Dialogue: 10/);
   assert.match(ass, /\\move\(256\.0,216\.0,512\.0,360\.0/);
   assert.match(ass, /\\p1/);
+});
+
+test('resampleCursorMoves keeps one control point per output bucket', () => {
+  const moves = [
+    { time: 0, x: 0.1, y: 0.1, cursorId: 'arrow' },
+    { time: 0.01, x: 0.2, y: 0.2, cursorId: 'arrow' },
+    { time: 0.02, x: 0.3, y: 0.3, cursorId: 'pointingHand' },
+    { time: 0.04, x: 0.4, y: 0.4, cursorId: 'pointingHand' },
+  ];
+  assert.deepEqual(resampleCursorMoves(moves, 30), [moves[2], moves[3]]);
+  assert.deepEqual(resampleCursorMoves(moves, 0), moves);
 });
