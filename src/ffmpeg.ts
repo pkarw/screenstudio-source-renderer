@@ -2,7 +2,7 @@ import { spawn } from 'node:child_process';
 import { access, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
-import { writeCursorAss } from './cursor.js';
+import { resampleCursorMoves, writeCursorAss } from './cursor.js';
 import { outputContainer, resolveVideoGeometry } from './options.js';
 import { ProgressDisplay } from './progress.js';
 import { clipSlices, durationOfSlices, mapCursorMovesThroughSlices, mapZoomsThroughSlices } from './timeline.js';
@@ -350,7 +350,8 @@ export async function prepareRender(project: ScreenStudioProject, options: Rende
   if (!slices.length) throw new Error('Requested range is outside the project timeline.');
   const zooms = mapZoomsThroughSlices(project.zooms, slices);
   const cursorMoves = mapCursorMovesThroughSlices(project.cursorMoves, slices);
-  const cursorVisible = options.cursor !== 'hidden' && cursorMoves.length > 0;
+  const renderedCursorMoves = resampleCursorMoves(cursorMoves, Math.min(fps, 30));
+  const cursorVisible = options.cursor !== 'hidden' && renderedCursorMoves.length > 0;
   const workDir = await mkdtemp(path.join(os.tmpdir(), 'ss-render-'));
   const displayList = path.join(workDir, 'display.txt');
   const webcamList = path.join(workDir, 'webcam.txt');
@@ -387,7 +388,7 @@ export async function prepareRender(project: ScreenStudioProject, options: Rende
   if (cursorAss) {
     await writeCursorAss({
       filename: cursorAss,
-      moves: cursorMoves,
+      moves: renderedCursorMoves,
       duration,
       width: preliminary.screenWidth,
       height: preliminary.screenHeight,
@@ -419,7 +420,7 @@ export async function prepareRender(project: ScreenStudioProject, options: Rende
       screenX: graph.screenX,
       screenY: graph.screenY,
       backgroundMode: graph.backgroundMode,
-      cursorEvents: cursorMoves.length,
+      cursorEvents: renderedCursorMoves.length,
     },
     inputArgs,
   };
