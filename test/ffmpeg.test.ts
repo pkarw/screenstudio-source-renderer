@@ -18,8 +18,8 @@ test('zoom expressions use zoompan frame time and filter time separately', () =>
     targetSource: 'manual',
   }], 60);
   assert.match(expressions.z, /on\/60/);
-  assert.match(expressions.tx, /0\.75000000/);
-  assert.match(expressions.ty, /0\.25000000/);
+  assert.match(expressions.tx, /0\.25000000/);
+  assert.match(expressions.ty, /-0\.25000000/);
   assert.match(expressions.cameraProgress, /\(t-2\.000000\)/);
   assert.doesNotMatch(expressions.cameraProgress, /on\/60/);
 });
@@ -29,8 +29,25 @@ test('later overlapping zooms win the focal point', () => {
     { start: 1, end: 6, zoom: 1.2, target: { x: 0.2, y: 0.3 }, targetSource: 'manual' },
     { start: 4, end: 5, zoom: 1.4, target: { x: 0.8, y: 0.7 }, targetSource: 'manual' },
   ], 60);
-  assert.match(expressions.tx, /^if\(between\(\(on\/60\),4\.000000,5\.000000\),0\.80000000,/);
-  assert.match(expressions.ty, /^if\(between\(\(on\/60\),4\.000000,5\.000000\),0\.70000000,/);
+  assert.match(expressions.tx, /\(0\.30000000\)\*\(gte\(\(on\/60\),4\.000000\)\*lt\(\(on\/60\),5\.000000\)\)/);
+  assert.match(expressions.ty, /\(0\.20000000\)\*\(gte\(\(on\/60\),4\.000000\)\*lt\(\(on\/60\),5\.000000\)\)/);
+  assert.doesNotMatch(expressions.tx, /if\(/);
+  assert.doesNotMatch(expressions.ty, /if\(/);
+});
+
+test('focal point expressions stay flat with hundreds of zooms', () => {
+  const zooms = Array.from({ length: 150 }, (_, index) => ({
+    start: index * 3,
+    end: index * 3 + 2,
+    zoom: 1.2,
+    target: { x: (index % 10) / 10, y: ((index + 3) % 10) / 10 },
+    targetSource: 'manual' as const,
+  }));
+  const expressions = zoomExpressions(zooms, 60);
+  assert.doesNotMatch(expressions.tx, /if\(/);
+  assert.doesNotMatch(expressions.ty, /if\(/);
+  assert.match(expressions.tx, /gte\(\(on\/60\),447\.000000\)/);
+  assert.match(expressions.ty, /lt\(\(on\/60\),449\.000000\)/);
 });
 
 test('prepareRender applies square camera, color background and cursor track', async () => {

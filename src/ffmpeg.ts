@@ -99,20 +99,57 @@ function rampExpression(zoom: OutputZoom): string {
   return `sin(min(clip((T-${zoom.start.toFixed(6)})/${ramp.toFixed(6)},0,1),clip((${zoom.end.toFixed(6)}-T)/${ramp.toFixed(6)},0,1))*PI/2)`;
 }
 
+interface FocalSegment {
+  start: number;
+  end: number;
+  x: number;
+  y: number;
+}
+
+function focalSegments(zooms: OutputZoom[]): FocalSegment[] {
+  const boundaries = [...new Set(zooms.flatMap((zoom) => [zoom.start, zoom.end]))]
+    .sort((left, right) => left - right);
+  const segments: FocalSegment[] = [];
+  for (let index = 0; index < boundaries.length - 1; index += 1) {
+    const start = boundaries[index];
+    const end = boundaries[index + 1];
+    if (start === undefined || end === undefined || end <= start) continue;
+    const midpoint = start + (end - start) / 2;
+    let active: OutputZoom | undefined;
+    for (const zoom of zooms) {
+      if (midpoint >= zoom.start && midpoint < zoom.end) active = zoom;
+    }
+    if (!active) continue;
+    const previous = segments.at(-1);
+    if (previous && previous.end === start && previous.x === active.target.x && previous.y === active.target.y) {
+      previous.end = end;
+    } else {
+      segments.push({ start, end, x: active.target.x, y: active.target.y });
+    }
+  }
+  return segments;
+}
+
+function focalExpression(segments: FocalSegment[], axis: 'x' | 'y', time: string): string {
+  const terms = segments
+    .map((segment) => {
+      const offset = segment[axis] - 0.5;
+      if (Math.abs(offset) < Number.EPSILON) return undefined;
+      const condition = `gte(${time},${segment.start.toFixed(6)})*lt(${time},${segment.end.toFixed(6)})`;
+      return `(${offset.toFixed(8)})*(${condition})`;
+    })
+    .filter((term): term is string => term !== undefined);
+  return terms.length ? `0.5+${terms.join('+')}` : '0.5';
+}
+
 export function zoomExpressions(zooms: OutputZoom[], fps: number): { z: string; tx: string; ty: string; cameraProgress: string } {
   const time = `(on/${fps})`;
   const active = zooms.map((zoom) => ({ ...zoom, progress: rampExpression(zoom).replaceAll('T', time) }));
   const zTerms = active.map((zoom) => `(${(zoom.zoom - 1).toFixed(8)})*(${zoom.progress})`);
   const z = zTerms.length ? `1+${zTerms.join('+')}` : '1';
-  let tx = '0.5';
-  let ty = '0.5';
-  for (let index = 0; index < active.length; index += 1) {
-    const zoom = active[index];
-    if (!zoom) continue;
-    const condition = `between(${time},${zoom.start.toFixed(6)},${zoom.end.toFixed(6)})`;
-    tx = `if(${condition},${zoom.target.x.toFixed(8)},${tx})`;
-    ty = `if(${condition},${zoom.target.y.toFixed(8)},${ty})`;
-  }
+  const segments = focalSegments(zooms);
+  const tx = focalExpression(segments, 'x', time);
+  const ty = focalExpression(segments, 'y', time);
   const cameraRamps = zooms.map((zoom) => rampExpression(zoom).replaceAll('T', 't'));
   const cameraProgress = cameraRamps.length ? `min(1,${cameraRamps.map((progress) => `(${progress})`).join('+')})` : '0';
   return { z, tx, ty, cameraProgress };
